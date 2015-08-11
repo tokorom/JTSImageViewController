@@ -446,6 +446,7 @@ typedef struct {
     
     self.imageView = [[UIImageView alloc] initWithFrame:referenceFrameInMyView];
     self.imageView.layer.cornerRadius = self.imageInfo.referenceCornerRadius;
+    self.imageView.layer.contentsRect = CGRectMake(0.0, 0.0, 1.0, 1.0);
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
     self.imageView.userInteractionEnabled = YES;
     self.imageView.isAccessibilityElement = NO;
@@ -594,6 +595,9 @@ typedef struct {
     if (self.imageInfo.referenceContentMode) {
         self.imageView.contentMode = self.imageInfo.referenceContentMode;
     }
+    if (0.0 < self.imageInfo.referenceContentsRect.size.width && 0.0 < self.imageInfo.referenceContentsRect.size.height) {
+        self.imageView.layer.contentsRect = self.imageInfo.referenceContentsRect;
+    }
     
     // This will be moved into the scroll view after
     // the transition finishes.
@@ -666,7 +670,13 @@ typedef struct {
                 cornerRadiusAnimation.toValue = @(0.0);
                 cornerRadiusAnimation.duration = duration;
                 [weakSelf.imageView.layer addAnimation:cornerRadiusAnimation forKey:@"cornerRadius"];
-                weakSelf.imageView.layer.cornerRadius = 0.0;
+
+                CABasicAnimation *contentsRectAnimation = [CABasicAnimation animationWithKeyPath:@"contentsRect"];
+                contentsRectAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+                contentsRectAnimation.fromValue = [NSValue valueWithCGRect:weakSelf.imageView.layer.contentsRect];
+                contentsRectAnimation.toValue = [NSValue valueWithCGRect:CGRectMake(0.0, 0.0, 1.0, 1.0)];
+                contentsRectAnimation.duration = duration;
+                [weakSelf.imageView.layer addAnimation:contentsRectAnimation forKey:@"contentsRect"];
                 
                 [UIView
                  animateWithDuration:duration
@@ -724,6 +734,9 @@ typedef struct {
                      
                  } completion:^(BOOL finished) {
                      
+                     weakSelf.imageView.layer.cornerRadius = 0.0;
+                     weakSelf.imageView.layer.contentsRect = CGRectMake(0.0, 0.0, 1.0, 1.0);
+
                      _flags.isManuallyResizingTheScrollViewFrame = YES;
                      weakSelf.scrollView.frame = weakSelf.view.bounds;
                      _flags.isManuallyResizingTheScrollViewFrame = NO;
@@ -1046,7 +1059,13 @@ typedef struct {
             cornerRadiusAnimation.toValue = @(weakSelf.imageInfo.referenceCornerRadius);
             cornerRadiusAnimation.duration = duration;
             [weakSelf.imageView.layer addAnimation:cornerRadiusAnimation forKey:@"cornerRadius"];
-            weakSelf.imageView.layer.cornerRadius = weakSelf.imageInfo.referenceCornerRadius;
+
+            CABasicAnimation *contentsRectAnimation = [CABasicAnimation animationWithKeyPath:@"contentsRect"];
+            contentsRectAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+            contentsRectAnimation.fromValue = [NSValue valueWithCGRect:CGRectMake(0.0, 0.0, 1.0, 1.0)];
+            contentsRectAnimation.toValue = [NSValue valueWithCGRect:weakSelf.imageInfo.referenceContentsRect];
+            contentsRectAnimation.duration = duration;
+            [weakSelf.imageView.layer addAnimation:contentsRectAnimation forKey:@"contentsRect"];
             
             [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut animations:^{
                 
@@ -1098,6 +1117,9 @@ typedef struct {
                 }
             } completion:^(BOOL finished) {
                 
+                weakSelf.imageView.layer.cornerRadius = weakSelf.imageInfo.referenceCornerRadius;
+                weakSelf.imageView.layer.contentsRect = weakSelf.imageInfo.referenceContentsRect;
+
                 // Needed if dismissing from a different orientation then the one we started with
                 if ([UIApplication sharedApplication].jts_usesViewControllerBasedStatusBarAppearance == NO) {
                     [[UIApplication sharedApplication] setStatusBarHidden:_startingInfo.statusBarHiddenPriorToPresentation

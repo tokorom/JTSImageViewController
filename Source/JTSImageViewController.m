@@ -671,12 +671,15 @@ typedef struct {
                 cornerRadiusAnimation.duration = duration;
                 [weakSelf.imageView.layer addAnimation:cornerRadiusAnimation forKey:@"cornerRadius"];
 
-                CABasicAnimation *contentsRectAnimation = [CABasicAnimation animationWithKeyPath:@"contentsRect"];
-                contentsRectAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-                contentsRectAnimation.fromValue = [NSValue valueWithCGRect:weakSelf.imageView.layer.contentsRect];
-                contentsRectAnimation.toValue = [NSValue valueWithCGRect:CGRectMake(0.0, 0.0, 1.0, 1.0)];
-                contentsRectAnimation.duration = duration;
-                [weakSelf.imageView.layer addAnimation:contentsRectAnimation forKey:@"contentsRect"];
+                if (0.0 < weakSelf.imageInfo.referenceContentsRect.size.width && 0.0 < weakSelf.imageInfo.referenceContentsRect.size.height) {
+                    CABasicAnimation *contentsRectAnimation = [CABasicAnimation animationWithKeyPath:@"contentsRect"];
+                    contentsRectAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+                    contentsRectAnimation.fromValue = [NSValue valueWithCGRect:weakSelf.imageView.layer.contentsRect];
+                    contentsRectAnimation.toValue = [NSValue valueWithCGRect:CGRectMake(0.0, 0.0, 1.0, 1.0)];
+                    contentsRectAnimation.duration = duration;
+                    [weakSelf.imageView.layer addAnimation:contentsRectAnimation forKey:@"contentsRect"];
+                    weakSelf.imageView.layer.contentsRect = CGRectMake(0.0, 0.0, 1.0, 1.0);
+                }
                 
                 [UIView
                  animateWithDuration:duration
@@ -735,7 +738,6 @@ typedef struct {
                  } completion:^(BOOL finished) {
                      
                      weakSelf.imageView.layer.cornerRadius = 0.0;
-                     weakSelf.imageView.layer.contentsRect = CGRectMake(0.0, 0.0, 1.0, 1.0);
 
                      _flags.isManuallyResizingTheScrollViewFrame = YES;
                      weakSelf.scrollView.frame = weakSelf.view.bounds;
@@ -1060,12 +1062,15 @@ typedef struct {
             cornerRadiusAnimation.duration = duration;
             [weakSelf.imageView.layer addAnimation:cornerRadiusAnimation forKey:@"cornerRadius"];
 
-            CABasicAnimation *contentsRectAnimation = [CABasicAnimation animationWithKeyPath:@"contentsRect"];
-            contentsRectAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-            contentsRectAnimation.fromValue = [NSValue valueWithCGRect:CGRectMake(0.0, 0.0, 1.0, 1.0)];
-            contentsRectAnimation.toValue = [NSValue valueWithCGRect:weakSelf.imageInfo.referenceContentsRect];
-            contentsRectAnimation.duration = duration;
-            [weakSelf.imageView.layer addAnimation:contentsRectAnimation forKey:@"contentsRect"];
+            if (0.0 < weakSelf.imageInfo.referenceContentsRect.size.width && 0.0 < weakSelf.imageInfo.referenceContentsRect.size.height) {
+                CABasicAnimation *contentsRectAnimation = [CABasicAnimation animationWithKeyPath:@"contentsRect"];
+                contentsRectAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+                contentsRectAnimation.fromValue = [NSValue valueWithCGRect:CGRectMake(0.0, 0.0, 1.0, 1.0)];
+                contentsRectAnimation.toValue = [NSValue valueWithCGRect:weakSelf.imageInfo.referenceContentsRect];
+                contentsRectAnimation.duration = duration;
+                [weakSelf.imageView.layer addAnimation:contentsRectAnimation forKey:@"contentsRect"];
+                weakSelf.imageView.layer.contentsRect = weakSelf.imageInfo.referenceContentsRect;
+            }
             
             [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut animations:^{
                 
@@ -1118,7 +1123,6 @@ typedef struct {
             } completion:^(BOOL finished) {
                 
                 weakSelf.imageView.layer.cornerRadius = weakSelf.imageInfo.referenceCornerRadius;
-                weakSelf.imageView.layer.contentsRect = weakSelf.imageInfo.referenceContentsRect;
 
                 // Needed if dismissing from a different orientation then the one we started with
                 if ([UIApplication sharedApplication].jts_usesViewControllerBasedStatusBarAppearance == NO) {

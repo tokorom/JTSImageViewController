@@ -288,6 +288,10 @@ typedef struct {
     else if (self.mode == JTSImageViewControllerMode_AltText) {
         [self viewDidLoadForAltTextMode];
     }
+
+    if (self.customView != nil) {
+        [self.view addSubview:self.customView];
+    }
 }
 
 - (void)viewDidLayoutSubviews {
@@ -1477,6 +1481,14 @@ typedef struct {
         } else {
             self.snapshotView.transform = transform;
         }
+    }
+
+    if (self.customView != nil) {
+        CGFloat x = 0;
+        CGFloat y = self.view.bounds.size.height - self.customView.bounds.size.height;
+        CGFloat w = self.view.bounds.size.width;
+        CGFloat h = self.customView.bounds.size.height;
+        self.customView.frame = CGRectMake(x, y, w, h);
     }
 }
 

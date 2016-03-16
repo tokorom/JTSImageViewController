@@ -63,6 +63,8 @@ extern CGFloat const JTSImageViewController_DefaultBackgroundBlurRadius;
 
 @property (weak, nonatomic, readwrite) id <JTSImageViewControllerAnimationDelegate> animationDelegate;
 
+@property (strong, nonatomic, readwrite) UIView *customView;
+
 /**
  Designated initializer.
  
